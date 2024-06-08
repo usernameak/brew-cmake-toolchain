@@ -16,6 +16,8 @@ function(add_brew_module module_name)
              MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endfunction()
 
-#set(CMAKE_C_FLAGS "-fshort-wchar -mword-relocations -ffunction-sections -fdata-sections -fno-exceptions -marm -mthumb-interwork -march=armv5te -specs=nosys.specs")
+add_compile_definitions(-D__BREW__)
+
+#set(CMAKE_C_FLAGS "-fshort-wchar -mword-relocations -ffunction-sections -fdata-sections -fno-exceptions -marm -mthumb-interwork -march=armv5te -specs=nosys.specs -D__BREW__")
 #set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-use-cxa-atexit -fno-rtti")
 #set(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -Wl,--entry=AEEMod_Load -Wl,--emit-relocs -Wl,--default-script=${CMAKE_CURRENT_LIST_DIR}/elf2mod.x -Wl,--no-wchar-size-warning -static-libgcc -Wl,--gc-sections")
