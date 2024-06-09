@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.17)
 
 set(BREW_TOOLCHAIN_FILE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
-set(BREW_COMPILER_ROOT_PATH "${BREW_TOOLCHAIN_FILE_DIR}/gcc_root")
+if (USE_SYSTEM_TOOLCHAIN)
+    # Debian-like Linux distros:
+    #  $ sudo apt install gcc-arm-none-eabi
+    set(BREW_COMPILER_ROOT_PATH "/usr")
+else()
+    set(BREW_COMPILER_ROOT_PATH "${BREW_TOOLCHAIN_FILE_DIR}/gcc_root")
+endif()
 set(BREW_PLATFORM_SDK_ROOT "${BREW_TOOLCHAIN_FILE_DIR}/platform_sdk_root/sdk")
 
 set(CMAKE_SYSTEM_NAME Generic)
@@ -15,9 +21,11 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 set(CMAKE_C_COMPILER ${BREW_COMPILER_ROOT_PATH}/bin/arm-none-eabi-gcc)
 set(CMAKE_CXX_COMPILER ${BREW_COMPILER_ROOT_PATH}/bin/arm-none-eabi-g++)
+set(ELF2MOD_TOOL wine ${BREW_TOOLCHAIN_FILE_DIR}/elf2mod.exe)
 if (WIN32)
     set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER}.exe)
     set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER}.exe)
+    set(ELF2MOD_TOOL ${BREW_TOOLCHAIN_FILE_DIR}/elf2mod.exe)
 endif()
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -29,10 +37,10 @@ include_directories(${BREW_PLATFORM_SDK_ROOT}/inc)
 
 function(add_brew_module module_name)
     add_executable(${module_name} ${ARGN})
-	target_compile_definitions(${module_name} PRIVATE -DDYNAMIC_APP)
+    target_compile_definitions(${module_name} PRIVATE -DDYNAMIC_APP)
     add_custom_command(TARGET ${module_name} POST_BUILD COMMAND
-        ${BREW_TOOLCHAIN_FILE_DIR}/elf2mod.exe 
-        ARGS    -output $<TARGET_FILE:${module_name}>.mod 
+        ${ELF2MOD_TOOL}
+        ARGS    -output $<TARGET_FILE:${module_name}>.mod
                 $<TARGET_FILE:${module_name}>)
 endfunction()
 
